@@ -19,27 +19,27 @@ import 'widgets/coordinate_dialog.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 
-// ---------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // MAIN
-// ---------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  runApp(const InspectorProApp());
+  runApp(const GeoMasterApp());
 }
 
-// ---------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // ROOT APP
-// ---------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-class InspectorProApp extends StatelessWidget {
-  const InspectorProApp({super.key});
+class GeoMasterApp extends StatelessWidget {
+  const GeoMasterApp({super.key});
 
   @override
   Widget build(context) {
     return MaterialApp(
-      title: "Inspector Pro 3",
+      title: "GeoMaster",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -52,9 +52,9 @@ class InspectorProApp extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // MAP SCREEN
-// ---------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -106,27 +106,25 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     }
   }
 
-  // ---------------------------------------------------------------
-  // PERMISOS REALES GELOCATOR ✅
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // PERMISOS
+  // ---------------------------------------------------------------------------
 
   Future<void> _reqPerms() async {
     await Permission.location.request();
 
     LocationPermission perm = await Geolocator.checkPermission();
-
     if (perm == LocationPermission.denied) {
       perm = await Geolocator.requestPermission();
     }
-
     if (perm == LocationPermission.deniedForever) {
       return;
     }
   }
 
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // SHARED TEXT
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
 
   Future<void> _checkShared() async {
     try {
@@ -169,9 +167,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     }
   }
 
-  // ---------------------------------------------------------------
-  // CARGA FOTOS
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // PHOTOS
+  // ---------------------------------------------------------------------------
 
   Future<void> _loadPhotos() async {
     _photos = await PhotoService.cleanAndLoad();
@@ -183,8 +181,8 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     if (data == null) return;
 
     _photos.add(data);
-    _photos.sort((a, b) =>
-        (b['timestamp'] as String).compareTo(a['timestamp'] as String));
+    _photos.sort(
+        (a, b) => (b['timestamp'] as String).compareTo(a['timestamp'] as String));
 
     await PhotoService.save(_photos);
 
@@ -198,9 +196,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     setState(() {});
   }
 
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // GALERÍA
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
 
   void _openGallery() {
     showModalBottomSheet(
@@ -233,9 +231,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     );
   }
 
-  // ---------------------------------------------------------------
-  // ✅ GPS REAL — VERSIÓN FINAL con variables NO NULLABLES
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // ✅ GPS REAL (NULL-SAFETY PERFECTA)
+  // ---------------------------------------------------------------------------
 
   Future<void> _goReal() async {
     try {
@@ -247,7 +245,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
         return;
       }
 
-      // Última posición (si existe)
+      // Última posición
       Position? last = await Geolocator.getLastKnownPosition();
       if (last != null) {
         if (!mounted) return;
@@ -257,7 +255,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
         });
       }
 
-      // Posición actual real (NO NULLABLE)
+      // Posición actual real (no-nulleable)
       final current = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation,
         timeLimit: const Duration(seconds: 8),
@@ -279,9 +277,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     }
   }
 
-  // ---------------------------------------------------------------
-  // AJUSTES
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // AJUSTES FINOS
+  // ---------------------------------------------------------------------------
 
   void _adjust(double dLat, double dLng) {
     if (_mocking) return;
@@ -295,9 +293,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     });
   }
 
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // SIMULACIÓN GPS
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
 
   Future<void> _toggleMock() async {
     if (_mocking) {
@@ -343,9 +341,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     });
   }
 
-  // ---------------------------------------------------------------
-  // UI
-  // ---------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // UI PRINCIPAL
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(context) {
@@ -429,6 +427,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // SETTINGS SHEET
+  // ---------------------------------------------------------------------------
+
   Widget _buildSettingsSheet() {
     return StatefulBuilder(
       builder: (_, setModal) {
@@ -476,6 +478,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       },
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // PANEL BOTTOM
+  // ---------------------------------------------------------------------------
 
   Widget _buildBottomPanel() {
     return Align(
