@@ -1,0 +1,37 @@
+name: inspector_pro_3
+description: Herramienta profesional de inspección técnica con mapa, fotos forenses y mock GPS blindado.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.2.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_map: ^6.0.0
+  latlong2: ^0.9.0
+  http: ^1.2.0
+  shared_preferences: ^2.2.2
+  image_picker: ^1.1.1
+  image: ^4.1.4
+  intl: ^0.19.0
+  utm: ^0.0.7
+  permission_handler: ^11.3.0
+  geolocator: ^10.1.0
+  crypto: ^3.0.3
+
+  # Para soporte Material 3
+  flutter_svg: ^2.0.9
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
