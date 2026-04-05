@@ -19,19 +19,11 @@ import 'widgets/coordinate_dialog.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 
-// -----------------------------------------------------------------------------
-// MAIN
-// -----------------------------------------------------------------------------
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(const InspectorProApp());
 }
-
-// -----------------------------------------------------------------------------
-// ROOT APP
-// -----------------------------------------------------------------------------
 
 class InspectorProApp extends StatelessWidget {
   const InspectorProApp({super.key});
@@ -51,10 +43,6 @@ class InspectorProApp extends StatelessWidget {
     );
   }
 }
-
-// -----------------------------------------------------------------------------
-// MAP SCREEN
-// -----------------------------------------------------------------------------
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -84,10 +72,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
   List<Map<String, dynamic>> _photos = [];
 
-  // ---------------------------------------------------------------------------
-  // INIT
-  // ---------------------------------------------------------------------------
-
   @override
   void initState() {
     super.initState();
@@ -110,10 +94,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // PERMISSIONS
-  // ---------------------------------------------------------------------------
-
   Future<void> _reqPerms() async {
     await [
       Permission.locationWhenInUse,
@@ -121,10 +101,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       Permission.notification,
     ].request();
   }
-
-  // ---------------------------------------------------------------------------
-  // SHARED TEXT FROM INTENTS
-  // ---------------------------------------------------------------------------
 
   Future<void> _checkShared() async {
     final txt = await _channel.getSharedText();
@@ -157,10 +133,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       ),
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // FORENSIC PHOTOS
-  // ---------------------------------------------------------------------------
 
   Future<void> _loadPhotos() async {
     _photos = await PhotoService.cleanAndLoad();
@@ -218,10 +190,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // GPS REAL
-  // ---------------------------------------------------------------------------
-
   Future<void> _goReal() async {
     bool enabled = await Geolocator.isLocationServiceEnabled();
     if (!enabled) {
@@ -231,7 +199,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       return;
     }
 
-    // Ultima posición conocida
     var p = await Geolocator.getLastKnownPosition();
     if (p != null) {
       setState(() {
@@ -241,7 +208,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     }
 
     try {
-      // Posición actual
       p = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation,
         timeLimit: const Duration(seconds: 8),
@@ -256,10 +222,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     } catch (_) {}
   }
 
-  // ---------------------------------------------------------------------------
-  // MICRO AJUSTES
-  // ---------------------------------------------------------------------------
-
   void _adjust(double dLat, double dLng) {
     if (_mocking) return;
 
@@ -271,10 +233,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       _map.move(_center, _map.camera.zoom);
     });
   }
-
-  // ---------------------------------------------------------------------------
-  // MOCK GPS
-  // ---------------------------------------------------------------------------
 
   Future<void> _toggleMock() async {
     if (_mocking) {
@@ -319,16 +277,11 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // UI
-  // ---------------------------------------------------------------------------
-
   @override
   Widget build(context) {
     return Scaffold(
       body: Stack(
         children: [
-          // MAPA
           FlutterMap(
             mapController: _map,
             options: MapOptions(
@@ -347,7 +300,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                     : "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 userAgentPackageName: "com.inspector.pro",
               ),
-
               CircleLayer(
                 circles: [
                   CircleMarker(
@@ -369,7 +321,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
             ],
           ),
 
-          // ICONO CENTRAL
           Center(
             child: Icon(
               _mocking ? Icons.gps_fixed : Icons.add_circle_outline,
@@ -378,7 +329,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
             ),
           ),
 
-          // MENÚ SUPERIOR
           SafeArea(
             child: Align(
               alignment: Alignment.topCenter,
@@ -396,14 +346,12 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
             ),
           ),
 
-          // MICRO AJUSTES
           MockControls(
             center: _center,
             isMocking: _mocking,
             onAdjust: _adjust,
           ),
 
-          // PANEL INFERIOR
           SafeArea(
             child: _buildBottomPanel(),
           )
@@ -411,10 +359,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       ),
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // SETTINGS SHEET
-  // ---------------------------------------------------------------------------
 
   Widget _buildSettingsSheet() {
     return StatefulBuilder(
@@ -462,10 +406,6 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       },
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // BOTTOM PANEL
-  // ---------------------------------------------------------------------------
 
   Widget _buildBottomPanel() {
     return Align(
