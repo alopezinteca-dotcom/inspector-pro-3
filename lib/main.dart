@@ -19,9 +19,9 @@ import 'widgets/coordinate_dialog.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------
 // MAIN
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,9 +29,9 @@ void main() async {
   runApp(const InspectorProApp());
 }
 
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------
 // ROOT APP
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------
 
 class InspectorProApp extends StatelessWidget {
   const InspectorProApp({super.key});
@@ -52,9 +52,9 @@ class InspectorProApp extends StatelessWidget {
   }
 }
 
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------
 // MAP SCREEN
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -106,57 +106,72 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // PERMISSIONS
-  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------
+  // PERMISOS REALES GELOCATOR ✅
+  // ---------------------------------------------------------------
 
   Future<void> _reqPerms() async {
-    await [
-      Permission.locationWhenInUse,
-      Permission.locationAlways,
-      Permission.notification,
-    ].request();
+    await Permission.location.request();
+
+    LocationPermission perm = await Geolocator.checkPermission();
+
+    if (perm == LocationPermission.denied) {
+      perm = await Geolocator.requestPermission();
+    }
+
+    if (perm == LocationPermission.deniedForever) {
+      return;
+    }
   }
 
-  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------
   // SHARED TEXT
-  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------
 
   Future<void> _checkShared() async {
-    final txt = await _channel.getSharedText();
-    if (txt == null || txt.isEmpty) return;
+    try {
+      final txt = await _channel.getSharedText();
+      if (txt == null || txt.isEmpty) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Procesando enlace...")),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Procesando enlace...")),
+      );
 
-    final pos = await _geo.resolve(txt);
-    if (pos == null) {
+      final pos = await _geo.resolve(txt);
+      if (pos == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("No se pudo extraer la coordenada."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        _center = LatLng(pos.latitude, pos.longitude);
+        _map.move(_center, 17);
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("No se pudo extraer la coordenada."),
+          content: Text("Ubicación capturada."),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error al procesar enlace: $e"),
           backgroundColor: Colors.red,
         ),
       );
-      return;
     }
-
-    setState(() {
-      _center = LatLng(pos.latitude, pos.longitude);
-      _map.move(_center, 17);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Ubicación capturada."),
-        backgroundColor: Colors.green,
-      ),
-    );
   }
 
-  // ---------------------------------------------------------------------------
-  // PHOTOS
-  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------
+  // CARGA FOTOS
+  // ---------------------------------------------------------------
 
   Future<void> _loadPhotos() async {
     _photos = await PhotoService.cleanAndLoad();
@@ -182,6 +197,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
 
     setState(() {});
   }
+
+  // ---------------------------------------------------------------
+  // GALERÍA
+  // ---------------------------------------------------------------
 
   void _openGallery() {
     showModalBottomSheet(
@@ -214,47 +233,55 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // GPS REAL — ✅ NULL SAFETY CORREGIDO
-  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------
+  // ✅ GPS REAL — VERSIÓN FINAL con variables NO NULLABLES
+  // ---------------------------------------------------------------
 
   Future<void> _goReal() async {
-    bool enabled = await Geolocator.isLocationServiceEnabled();
-    if (!enabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Activa el GPS físico.")),
-      );
-      return;
-    }
-
-    // Última posición
-    var p = await Geolocator.getLastKnownPosition();
-    if (p != null) {
-      setState(() {
-        _center = LatLng(p.latitude, p.longitude);
-        _map.move(_center, 17);
-      });
-    }
-
-    // Intentar posición actual
     try {
-      p = await Geolocator.getCurrentPosition(
+      bool enabled = await Geolocator.isLocationServiceEnabled();
+      if (!enabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Activa el GPS físico.")),
+        );
+        return;
+      }
+
+      // Última posición (si existe)
+      Position? last = await Geolocator.getLastKnownPosition();
+      if (last != null) {
+        if (!mounted) return;
+        setState(() {
+          _center = LatLng(last.latitude, last.longitude);
+          _map.move(_center, 17);
+        });
+      }
+
+      // Posición actual real (NO NULLABLE)
+      final current = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation,
         timeLimit: const Duration(seconds: 8),
       );
 
-      if (p != null) {
-        setState(() {
-          _center = LatLng(p.latitude, p.longitude);
-          _map.move(_center, 17);
-        });
-      }
-    } catch (_) {}
+      if (!mounted) return;
+      setState(() {
+        _center = LatLng(current.latitude, current.longitude);
+        _map.move(_center, 17);
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error GPS: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
-  // ---------------------------------------------------------------------------
-  // MICRO AJUSTES
-  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------
+  // AJUSTES
+  // ---------------------------------------------------------------
 
   void _adjust(double dLat, double dLng) {
     if (_mocking) return;
@@ -268,9 +295,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // MOCK GPS
-  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------
+  // SIMULACIÓN GPS
+  // ---------------------------------------------------------------
 
   Future<void> _toggleMock() async {
     if (_mocking) {
@@ -301,7 +328,8 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     if (res != "SUCCESS") {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Selecciona esta app en 'Opciones de Desarrollador'"),
+          content:
+              Text("Selecciona esta app en 'Opciones de Desarrollador'"),
           backgroundColor: Colors.red,
         ),
       );
@@ -315,9 +343,9 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     });
   }
 
-  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------
   // UI
-  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------
 
   @override
   Widget build(context) {
@@ -395,9 +423,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
             onAdjust: _adjust,
           ),
 
-          SafeArea(
-            child: _buildBottomPanel(),
-          )
+          SafeArea(child: _buildBottomPanel()),
         ],
       ),
     );
@@ -413,7 +439,8 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
             children: [
               const Text(
                 "⚙️ Ajustes de Auditoría",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const Divider(),
 
@@ -463,9 +490,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
             borderRadius: BorderRadius.circular(16),
             boxShadow: const [
               BoxShadow(
-                  color: Colors.black45,
-                  blurRadius: 10,
-                  spreadRadius: 2)
+                color: Colors.black45,
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
             ],
           ),
           child: Column(
@@ -482,28 +510,32 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                       const Text(
                         "OBJETIVO (WGS84 - 7 Dec)",
                         style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold),
+                          color: Colors.grey,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         "Lat: ${_center.latitude.toStringAsFixed(7)}",
                         style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         "Lng: ${_center.longitude.toStringAsFixed(7)}",
                         style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
 
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueGrey[100]),
+                      backgroundColor: Colors.blueGrey[100],
+                    ),
                     icon: const Icon(Icons.edit_location_alt),
                     label: const Text("PLANTILLA"),
                     onPressed: () {
@@ -542,9 +574,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                       ? "🛑 DETENER SIMULACIÓN"
                       : "🚀 INICIAR SIMULACIÓN BLINDADA",
                   style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold),
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
