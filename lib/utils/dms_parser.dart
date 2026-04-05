@@ -9,7 +9,7 @@ class DMSParser {
   static LatLng? parseDMS(String input) {
     try {
       final regex = RegExp(
-        r'(-?\d+)[°º\s]+(\d+)[\'\s]+(\d+(?:\.\d+)?)[\"\s]*([NnSs])?[, ]+\s*(-?\d+)[°º\s]+(\d+)[\'\s]+(\d+(?:\.\d+)?)[\"\s]*([EeWw])?',
+        r'(-?\d+)[°º\s]+(\d+)[\'\s]+(\d+(?:\.\d+)?)[\"\s]*([NnSs])?[, ]+\s*(-?\d+)[°º\s]+(\d+)[\'\s]+(\d+(?:\.\d+)?)[\"\s]*([EeWw])?'
       );
 
       final m = regex.firstMatch(input);
