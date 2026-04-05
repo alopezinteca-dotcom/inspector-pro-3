@@ -30,7 +30,7 @@ void main() async {
 }
 
 // -----------------------------------------------------------------------------
-// APP RAIZ
+// ROOT APP
 // -----------------------------------------------------------------------------
 
 class InspectorProApp extends StatelessWidget {
@@ -53,7 +53,7 @@ class InspectorProApp extends StatelessWidget {
 }
 
 // -----------------------------------------------------------------------------
-// PANTALLA PRINCIPAL
+// MAP SCREEN
 // -----------------------------------------------------------------------------
 
 class MapScreen extends StatefulWidget {
@@ -111,7 +111,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   }
 
   // ---------------------------------------------------------------------------
-  // PERMISOS
+  // PERMISSIONS
   // ---------------------------------------------------------------------------
 
   Future<void> _reqPerms() async {
@@ -123,7 +123,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   }
 
   // ---------------------------------------------------------------------------
-  // SHARED TEXT
+  // SHARED TEXT FROM INTENTS
   // ---------------------------------------------------------------------------
 
   Future<void> _checkShared() async {
@@ -159,7 +159,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   }
 
   // ---------------------------------------------------------------------------
-  // FOTOS FORENSES
+  // FORENSIC PHOTOS
   // ---------------------------------------------------------------------------
 
   Future<void> _loadPhotos() async {
@@ -212,7 +212,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
           await PhotoService.save(_photos);
 
           Navigator.pop(context);
-          _openGallery(); // Fluidez al borrar
+          _openGallery();
         },
       ),
     );
@@ -231,6 +231,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       return;
     }
 
+    // Ultima posición conocida
     var p = await Geolocator.getLastKnownPosition();
     if (p != null) {
       setState(() {
@@ -240,19 +241,23 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     }
 
     try {
+      // Posición actual
       p = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation,
         timeLimit: const Duration(seconds: 8),
       );
-      setState(() {
-        _center = LatLng(p.latitude, p.longitude);
-        _map.move(_center, 17);
-      });
+
+      if (p != null) {
+        setState(() {
+          _center = LatLng(p.latitude, p.longitude);
+          _map.move(_center, 17);
+        });
+      }
     } catch (_) {}
   }
 
   // ---------------------------------------------------------------------------
-  // MICROAJUSTES
+  // MICRO AJUSTES
   // ---------------------------------------------------------------------------
 
   void _adjust(double dLat, double dLng) {
@@ -268,7 +273,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   }
 
   // ---------------------------------------------------------------------------
-  // SIMULACIÓN GPS
+  // MOCK GPS
   // ---------------------------------------------------------------------------
 
   Future<void> _toggleMock() async {
@@ -300,8 +305,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     if (res != "SUCCESS") {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content:
-              Text("Selecciona esta app en 'Opciones de Desarrollador'"),
+          content: Text("Selecciona esta app en 'Opciones de Desarrollador'"),
           backgroundColor: Colors.red,
         ),
       );
@@ -392,7 +396,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
             ),
           ),
 
-          // MICROAJUSTES
+          // MICRO AJUSTES
           MockControls(
             center: _center,
             isMocking: _mocking,
@@ -409,7 +413,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   }
 
   // ---------------------------------------------------------------------------
-  // PANEL DE AJUSTES
+  // SETTINGS SHEET
   // ---------------------------------------------------------------------------
 
   Widget _buildSettingsSheet() {
@@ -460,7 +464,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   }
 
   // ---------------------------------------------------------------------------
-  // PANEL INFERIOR
+  // BOTTOM PANEL
   // ---------------------------------------------------------------------------
 
   Widget _buildBottomPanel() {
