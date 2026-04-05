@@ -7,7 +7,8 @@ pluginManagement {
 }
 
 plugins {
-    id("org.jetbrains.kotlin.android") version "2.1.0"
+    // ❌ NO pongas: id("org.jetbrains.kotlin.android")
+    id("dev.flutter.flutter-plugin-loader") version "1.0.0"
 }
 
 include(":app")
