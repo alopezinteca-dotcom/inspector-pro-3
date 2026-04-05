@@ -19,11 +19,19 @@ import 'widgets/coordinate_dialog.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 
+// -----------------------------------------------------------------------------
+// MAIN
+// -----------------------------------------------------------------------------
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   runApp(const InspectorProApp());
 }
+
+// -----------------------------------------------------------------------------
+// ROOT APP
+// -----------------------------------------------------------------------------
 
 class InspectorProApp extends StatelessWidget {
   const InspectorProApp({super.key});
@@ -43,6 +51,10 @@ class InspectorProApp extends StatelessWidget {
     );
   }
 }
+
+// -----------------------------------------------------------------------------
+// MAP SCREEN
+// -----------------------------------------------------------------------------
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -94,6 +106,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // PERMISSIONS
+  // ---------------------------------------------------------------------------
+
   Future<void> _reqPerms() async {
     await [
       Permission.locationWhenInUse,
@@ -101,6 +117,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       Permission.notification,
     ].request();
   }
+
+  // ---------------------------------------------------------------------------
+  // SHARED TEXT
+  // ---------------------------------------------------------------------------
 
   Future<void> _checkShared() async {
     final txt = await _channel.getSharedText();
@@ -133,6 +153,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       ),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // PHOTOS
+  // ---------------------------------------------------------------------------
 
   Future<void> _loadPhotos() async {
     _photos = await PhotoService.cleanAndLoad();
@@ -190,6 +214,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // GPS REAL — ✅ NULL SAFETY CORREGIDO
+  // ---------------------------------------------------------------------------
+
   Future<void> _goReal() async {
     bool enabled = await Geolocator.isLocationServiceEnabled();
     if (!enabled) {
@@ -199,6 +227,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       return;
     }
 
+    // Última posición
     var p = await Geolocator.getLastKnownPosition();
     if (p != null) {
       setState(() {
@@ -207,6 +236,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       });
     }
 
+    // Intentar posición actual
     try {
       p = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation,
@@ -222,6 +252,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     } catch (_) {}
   }
 
+  // ---------------------------------------------------------------------------
+  // MICRO AJUSTES
+  // ---------------------------------------------------------------------------
+
   void _adjust(double dLat, double dLng) {
     if (_mocking) return;
 
@@ -233,6 +267,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       _map.move(_center, _map.camera.zoom);
     });
   }
+
+  // ---------------------------------------------------------------------------
+  // MOCK GPS
+  // ---------------------------------------------------------------------------
 
   Future<void> _toggleMock() async {
     if (_mocking) {
@@ -277,6 +315,10 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // UI
+  // ---------------------------------------------------------------------------
+
   @override
   Widget build(context) {
     return Scaffold(
@@ -300,6 +342,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
                     : "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 userAgentPackageName: "com.inspector.pro",
               ),
+
               CircleLayer(
                 circles: [
                   CircleMarker(
