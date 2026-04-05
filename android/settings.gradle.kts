@@ -7,8 +7,9 @@ pluginManagement {
 }
 
 plugins {
-    // ❌ NO pongas: id("org.jetbrains.kotlin.android")
-    id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+    // ⚠️ NO pongas el plugin de Kotlin aquí
+    // ⚠️ NO pongas plugin loader
+    // Este archivo debe llevar SOLO lo que ves aquí
 }
 
 include(":app")
