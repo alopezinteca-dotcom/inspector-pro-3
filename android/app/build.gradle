@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace "com.inspector.pro"
-    compileSdkVersion 36   // ✅ CORREGIDO
+    compileSdkVersion 36
 
     defaultConfig {
         applicationId "com.inspector.pro"
@@ -14,6 +14,16 @@ android {
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
+    }
+
+    // ✅ JVM 17 (LO CORRECTO EN 2026)
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
     }
 
     buildTypes {
@@ -36,5 +46,5 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // ❌ NO PONER kotlin-stdlib-jdk7
 }
