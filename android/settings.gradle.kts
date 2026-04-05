@@ -4,12 +4,22 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+
+    val flutterSdkPath = run {
+        val properties = java.util.Properties()
+        file("local.properties").inputStream().use { properties.load(it) }
+        val path = properties.getProperty("flutter.sdk")
+        require(path != null) { "flutter.sdk not set in local.properties" }
+        path
+    }
+
+    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 }
 
 plugins {
-    // ⚠️ NO pongas el plugin de Kotlin aquí
-    // ⚠️ NO pongas plugin loader
-    // Este archivo debe llevar SOLO lo que ves aquí
+    id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+    id("com.android.application") version "8.1.2" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.0" apply false
 }
 
 include(":app")
