@@ -18,6 +18,14 @@ workflows:
           flutter build appbundle --release
           flutter build apk --release
 
+      - name: Fix Codemagic artifact paths
+        script: |
+          echo "Searching for AAB..."
+          find build/ -name "*.aab"
+
+          echo "Searching for APK..."
+          find build/ -name "*.apk"
+
     artifacts:
-      - build/app/outputs/bundle/release/*.aab
-      - build/app/outputs/flutter-apk/app-release.apk
+      - build/**/**/*.aab
+      - build/**/**/*.apk
