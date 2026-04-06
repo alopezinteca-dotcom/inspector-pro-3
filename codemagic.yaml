@@ -27,8 +27,9 @@ workflows:
 
       - name: Verify outputs
         script: |
-          echo "==== AAB files ===="
+          echo "===== Flutter outputs ====="
           ls -R build/app/outputs || true
+          echo "===== Gradle outputs ====="
           ls -R android/app/build/outputs || true
 
     artifacts:
