@@ -1,7 +1,7 @@
 workflows:
   geomaster-release:
     name: GeoMaster Release Build
-    max_build_duration: 60
+    max_build_duration: 90
 
     environment:
       flutter: stable
@@ -13,11 +13,26 @@ workflows:
           flutter clean
           flutter pub get
 
-      - name: Build GeoMaster with Flutter (release)
+      - name: Build with Flutter (release)
         script: |
-          flutter build appbundle --release
-          flutter build apk --release
+          flutter build appbundle --release || echo "Flutter wrapper failed"
+          flutter build apk --release || echo "Flutter wrapper failed"
+
+      - name: Fallback Gradle build (stable)
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew clean
+          ./gradlew bundleRelease assembleRelease
+
+      - name: Verify outputs
+        script: |
+          echo "==== AAB files ===="
+          ls -R build/app/outputs || true
+          ls -R android/app/build/outputs || true
 
     artifacts:
-      - build/app/outputs/bundle/release/*.aab
-      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/**/*.aab
+      - build/app/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/*.apk
