@@ -1,31 +1,24 @@
 workflows:
   geomaster-release:
     name: GeoMaster Release Build
-    max_build_duration: 60
+    max_build_duration: 90
 
     environment:
       flutter: stable
       java: 17
 
     scripts:
-      - name: Clean and get packages
+      - name: Clean & get packages
         script: |
           flutter clean
           flutter pub get
 
-      - name: Build GeoMaster (.AAB + .APK)
+      - name: Build Android with Gradle (release)
         script: |
-          flutter build appbundle --release
-          flutter build apk --release
-
-      - name: Fix Codemagic artifact paths
-        script: |
-          echo "Searching for AAB..."
-          find build/ -name "*.aab"
-
-          echo "Searching for APK..."
-          find build/ -name "*.apk"
+          cd android
+          ./gradlew clean
+          ./gradlew bundleRelease assembleRelease
 
     artifacts:
-      - build/**/**/*.aab
-      - build/**/**/*.apk
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/*.apk
