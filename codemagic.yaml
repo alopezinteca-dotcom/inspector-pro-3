@@ -1,24 +1,23 @@
 workflows:
   geomaster-release:
     name: GeoMaster Release Build
-    max_build_duration: 90
+    max_build_duration: 60
 
     environment:
       flutter: stable
       java: 17
 
     scripts:
-      - name: Clean & get packages
+      - name: Clean and get packages
         script: |
           flutter clean
           flutter pub get
 
-      - name: Build Android with Gradle (release)
+      - name: Build GeoMaster with Flutter (release)
         script: |
-          cd android
-          ./gradlew clean
-          ./gradlew bundleRelease assembleRelease
+          flutter build appbundle --release
+          flutter build apk --release
 
     artifacts:
-      - android/app/build/outputs/**/*.aab
-      - android/app/build/outputs/**/*.apk
+      - build/app/outputs/bundle/release/*.aab
+      - build/app/outputs/flutter-apk/app-release.apk
