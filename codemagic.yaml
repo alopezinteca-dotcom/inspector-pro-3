@@ -6,25 +6,20 @@ workflows:
     environment:
       flutter: stable
       java: 17
-      android_sdk: latest
 
     scripts:
-      - name: Clean & Get packages
+      - name: Clean and get packages
         script: |
           flutter clean
           flutter pub get
 
       - name: Build GeoMaster (.AAB + .APK)
         script: |
-          # ✅ Compilar en RELEASE SIEMPRE
           flutter build appbundle --release
           flutter build apk --release
 
     artifacts:
-      # ✅ AAB final para instalar en tablet o Play Store
       - build/app/outputs/bundle/release/*.aab
-
-      # ✅ APK final para instalar directamente
       - build/app/outputs/flutter-apk/app-release.apk
 
     publishing:
