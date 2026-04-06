@@ -32,16 +32,11 @@ android {
             signingConfig signingConfigs.debug
         }
     }
-
-    applicationVariants.all { variant ->
-        variant.outputs.all {
-            outputFileName = "GeoMaster-${variant.name}.apk"
-        }
-    }
 }
 
 flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+}
